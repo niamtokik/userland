@@ -21,3 +21,7 @@ directories present in root were added (e.g. `doc`).
    implementation.
 
  * Compare OpenBSD code with Mercury C generated one.
+
+ * Create a full CI/CD build pipeline for Mercury and OpenBSD.
+ 
+ * Would be awesome to hack the kernel and write it in Mercury!
