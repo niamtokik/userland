@@ -138,3 +138,12 @@ read(Stream, !IO) :-
 		Char = error(Error),
 		io.format("error", [], !IO)
 	).
+
+:- pred usage(io::di, io::uo) is det.
+
+usage(!IO) :-
+	io.progname("cat", Progname, !IO),
+	s("[-benstuv]") = Flags,
+	s("[file ...]") = Files,
+	[s(Progname), Flags, Files] = Usage,
+	io.format("usage: %s %s %s\n", Usage, !IO).
