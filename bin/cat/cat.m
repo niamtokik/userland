@@ -1,4 +1,6 @@
+%%%
 %%% copyright (c) Mathieu Kerjouan
+%%%
 
 :- module cat.
 :- interface.
@@ -64,14 +66,24 @@ main(!IO) :-
 	option_ops(short_option, long_option, option_defaults) = OptionOps,
 
 	% parse the command line arguments
+	% OptionOps was previously defined
+	% Args contains the whole arguments
+	% OptionArgs contains the remaining args (e.g. after --)
+	% Result contains the parsed arguments based on type
 	getopt.process_options(OptionOps, Args, OptionArgs, Result),
 	(
 		Result = ok(OptionTable),
-		map.values(OptionTable, Keys)
+		map.values(OptionTable, Keys),
+		( map.search(OptionTable, dollar_sign, Value),
+		 Value = bool(yes) ->
+			io.format("yes\n", [], !IO)
+		;
+			io.format("no\n", [], !IO)
+		),
+		cat(OptionArgs, !IO)
 	;
 		Result = error(Error)
 	).
-	
 
 :- pred arguments(list(string)::in, io::di, io::uo) is det.
 
@@ -80,3 +92,34 @@ arguments([], !IO) :-
 arguments([H|T], !IO) :-
 	io.format("%s\n", [s(H)], !IO),
 	arguments(T, !IO).
+
+:- pred cat(list(string)::in, io::di, io::uo) is det.
+
+cat([], !IO) :- 
+	io.format("", [], !IO). 
+cat([File|Rest], !IO) :-
+	io.open_input(File, Stream, !IO),
+	( 
+		Stream = ok(S),
+		read(S, !IO),
+		cat(Rest, !IO)
+	;
+		Stream = error(Error)
+	). 
+
+:- pred read(io.text_input_stream::in, io::di, io::uo) is det.
+
+read(Stream, !IO) :-
+	io.read_char(Stream, Char, !IO),
+	( 
+		Char = ok(C),
+		io.format("%c", [c(C)], !IO),
+		read(Stream, !IO)
+	;
+		Char = eof,
+		io.format("", [], !IO)
+	;
+		Char = error(Error),
+		io.format("error", [], !IO)
+	).
+	
