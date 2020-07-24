@@ -1,0 +1,2 @@
+build:
+	mmc --make libopenbsd
