@@ -21,8 +21,11 @@
 :- module openbsd.pledge.
 :- interface.
 
-:- type promises ---> 
-	  stdio
+:- import_module list.
+
+:- type promise ---> 
+	  null
+	; stdio
 	; rpath
 	; wpath
 	; cpath
@@ -54,11 +57,15 @@
 	; unveil
 	; error.
 
-:- pred pledge_to_string(promises::in, string::out) is det.
+:- type promises ---> [promise].
+
+:- pred pledge(promise::in, promises::out) is det.
 
 :- implementation.
 :- import_module string.
 
+:- pred pledge_to_string(promise::in, string::out) is det.
+pledge_to_string(null, "").
 pledge_to_string(stdio, "stdio").
 pledge_to_string(rpath, "rpath").
 pledge_to_string(wpath, "wpath").
@@ -90,3 +97,19 @@ pledge_to_string(video, "video").
 pledge_to_string(bpf, "bpf").
 pledge_to_string(unveil, "unveil").
 pledge_to_string(error, "error").
+
+%
+% need to work on that
+%
+pledge(Promises, ExecPromises, Return, !IO).
+
+%
+% need to test the implementation
+% 
+:- pred pledge0(promises::in, promises::in, int::out, io::di, io::uo) is det.
+:- pragma foreign_proc("C",
+	pledge0(Promises::in, ExecPromises::in, Return::out, _IO0::di, _IO::uo),
+	[promise_pure, will_not_call_mercury, thread_safe, tabled_for_io],
+"
+	Return = pledge(Promises, ExecPromises);
+").
